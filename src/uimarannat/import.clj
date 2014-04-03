@@ -5,8 +5,11 @@
 
 (defn process-line
 	[line]
-	(let [[date name coordinates description] (split line #"\t")]
-		name))
+	(let [[date name coordinates description] (split line #"\t")
+		  [lat lon] (map read-string (split coordinates #","))]
+		(if (and (number? lat) (number? lon))
+			(str lat ":" lon)
+			"")))
 
 (defn -main
   "I don't do a whole lot ... yet."
