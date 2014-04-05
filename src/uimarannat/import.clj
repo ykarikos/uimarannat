@@ -5,6 +5,13 @@
 (use 'clojure.java.io)
 (use '[clojure.string :only (split)])
 
+; query like this:
+; db.runCommand( { geoNear: "rannat", 
+;	near: {type: "Point", 
+;		coordinates: [21.5228, 61.5643] }, 
+;		spherical: true, 
+;		maxDistance: 10 }).results.length
+
 (defn process-line
 	[line]
 	(let [[date name coordinates description] (split line #"\t")
@@ -12,12 +19,11 @@
 		(if (and (number? lat) (number? lon))
 			{:date date
 			 :name name
-			 :lat lat
-			 :lon lon
+			 :location {:type "Point" :coordinates [lon, lat]}
 			 :description description})))
 
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Save data in a GeoJSON database"
   [& args]
   (mg/connect!)
   (mg/set-db! (mg/get-db "uimarannat"))
@@ -25,5 +31,5 @@
   	(doseq [line (line-seq rdr)]
   		(let [data (process-line line)]
   			(if data
-	  			(mc/insert "rannat" (process-line line)))))))
+	  			(mc/insert "rannat" data))))))
 
