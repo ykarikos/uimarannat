@@ -12,7 +12,7 @@
 ;		spherical: true, 
 ;		maxDistance: 10 }).results.length
 
-(defn process-line
+(defn parse-line
 	[line]
 	(let [[date name coordinates description] (split line #"\t")
 		  [lat lon] (map read-string (split coordinates #","))]
@@ -23,13 +23,13 @@
 			 :description description})))
 
 (defn -main
-  "Save data in a GeoJSON database"
-  [& args]
+  "Save tsv data in a GeoJSON database"
+  [dbname filename & args]
   (mg/connect!)
-  (mg/set-db! (mg/get-db "uimarannat"))
-  (with-open [rdr (reader "uimapaikkakysely.tsv")]
+  (mg/set-db! (mg/get-db dbname))
+  (with-open [rdr (reader filename)]
   	(doseq [line (line-seq rdr)]
-  		(let [data (process-line line)]
+  		(let [data (parse-line line)]
   			(if data
 	  			(mc/insert "rannat" data))))))
 
