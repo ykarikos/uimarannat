@@ -28,9 +28,8 @@
 	"Read a tsv file from rdr"
 	[rdr]
   	(doseq [line (line-seq rdr)]
-  		(let [data (parse-line line)]
-  			(if data
-	  			(mc/insert collection data)))))
+  		(if-let [data (parse-line line)]
+  			(mc/insert collection data))))
 
 (defn -main
   "Save tsv data in a GeoJSON database"
