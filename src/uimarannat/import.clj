@@ -12,6 +12,8 @@
 ;		spherical: true, 
 ;		maxDistance: 10 }).results.length
 
+(def collection "rannat")
+
 (defn parse-line
 	[line]
 	(let [[date name coordinates description] (split line #"\t")
@@ -22,14 +24,20 @@
 			 :location {:type "Point" :coordinates [lon, lat]}
 			 :description description})))
 
+(defn process-data
+	"Read a tsv file from rdr"
+	[rdr]
+  	(doseq [line (line-seq rdr)]
+  		(let [data (parse-line line)]
+  			(if data
+	  			(mc/insert collection data)))))
+
 (defn -main
   "Save tsv data in a GeoJSON database"
   [dbname filename & args]
   (mg/connect!)
   (mg/set-db! (mg/get-db dbname))
   (with-open [rdr (reader filename)]
-  	(doseq [line (line-seq rdr)]
-  		(let [data (parse-line line)]
-  			(if data
-	  			(mc/insert "rannat" data))))))
+  	(process-data rdr))
+  (println (str (mc/count collection) " documents in db")))
 
