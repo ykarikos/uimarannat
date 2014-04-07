@@ -1,18 +1,9 @@
 (ns uimarannat.import
-	(:require [monger.collection :as mc]
-			  [monger.core :as mg]))
+	(:require [uimarannat.db :as db]))
 
 (use 'clojure.java.io)
 (use '[clojure.string :only (split)])
 
-; query like this:
-; db.runCommand( { geoNear: "rannat", 
-;	near: {type: "Point", 
-;		coordinates: [21.5228, 61.5643] }, 
-;		spherical: true, 
-;		maxDistance: 10 }).results.length
-
-(def collection "rannat")
 
 (defn parse-line
 	[line]
@@ -21,7 +12,7 @@
 		(if (and (number? lat) (number? lon))
 			{:date date
 			 :name name
-			 :location {:type "Point" :coordinates [lon, lat]}
+			 :location {:type "Point" :coordinates [lon lat]}
 			 :description description})))
 
 (defn process-data
@@ -29,14 +20,14 @@
 	[rdr]
   	(doseq [line (line-seq rdr)]
   		(if-let [data (parse-line line)]
-  			(mc/insert collection data))))
+        (let [coordinates (-> data :location :coordinates)]
+    			(db/insert-location data)))))
 
 (defn -main
   "Save tsv data in a GeoJSON database"
   [dbname filename & args]
-  (mg/connect!)
-  (mg/set-db! (mg/get-db dbname))
+  (db/connect! dbname)
   (with-open [rdr (reader filename)]
   	(process-data rdr))
-  (println (str (mc/count collection) " documents in db")))
+  (println (str (db/count-locations) " locations in db")))
 
