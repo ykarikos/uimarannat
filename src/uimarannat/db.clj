@@ -34,3 +34,12 @@
   "Insert a location to db"
   [data]
   (mc/insert collection data))
+
+(defn merge-locations
+  "Merge new location comments with existing one"
+  [old-data new-data]
+  (let [old-id (old-data :_id)
+        old-comments (old-data :comments)
+        new-comments (new-data :comments)]
+    (mc/update-by-id collection old-id
+                     {"$set" {:comments (into old-comments new-comments)}})))
