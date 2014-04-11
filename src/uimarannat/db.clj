@@ -1,7 +1,7 @@
 (ns uimarannat.db
-  	(:require [monger.collection :as mc]
-      			  [monger.core :as mg]
-              [monger.command :as mcmd]))
+  (:require [monger.collection :as mc]
+            [monger.core :as mg]
+            [monger.command :as mcmd]))
 
 (require '[monger.conversion :refer [from-db-object]])
 
@@ -19,9 +19,9 @@
   [coordinates maxDistance]
   (let [raw-result (mg/command
                     (sorted-map :geoNear collection
-                        :near {:type "Point" :coordinates coordinates}
-                        :spherical true
-                        :maxDistance maxDistance))
+                                :near {:type "Point" :coordinates coordinates}
+                                :spherical true
+                                :maxDistance maxDistance))
         result (from-db-object raw-result true)]
     (result :results)))
 
